@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Image HTML Guide</title>
+
+    <style>
+        .lazy,
+        .lazy-scroll {
+            transition-property: filter;
+            will-change: filter;
+            transition-duration: 250ms;
+        }
+
+        .lazy[data-srcset],
+        .lazy-scroll[data-srcset] {
+            filter: blur(1rem);
+        }
+
+        .img-container {
+            width: 200px;
+            height: 267px;
+        }
+
+        @media only screen and (min-width: 768px) {
+            .img-container {
+                width: 400px;
+                height: 533px;
+            }
+        }
+
+        img {
+            width: 100%;
+            max-width: 100%;
+            height: 100%;
+            max-height: 100%;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Image HTML Guide</h1>
+    <p>For lazy loaded images, try to throttle your network by right clicking your mouse and going to the inspect tab.
+        Then, click network and select the "No throttling" and choose the "Slow 3G" option.</p>
+
+    <section>
+        <h2>Normal Image</h2>
+
+        <div class="img-container">
+            <img
+                src="./cat-img-400px.jpg"
+                alt="An image of a cat lying on a pillow with half of its body covered with a blanket"
+                width="400"
+                height="533"
+            />
+        </div>
+    </section>
+
+    <section>
+        <h2>Responsive Image</h2>
+
+        <p>Using the Picture element</p>
+
+            <picture>
+                 <source srcset="./cat-img-400px.jpg" media="(min-width: 768px)">
+                <img style="width: auto; max-width: auto; height: auto; max-height: auto;" src="./cat-img-200px.jpg" sizes="(min-width: 768px) 400px, 200px"
+                    alt="An image of a cat lying on a pillow with half of its body covered with a blanket" />
+            </picture>
+
+        <p>Using the sizes attribute</p>
+
+        <div class="img-container">
+            <img alt="An image of a cat lying on a pillow with half of its body covered with a blanket" srcset="./cat-img-200px.jpg 200w, ./cat-img-400px.jpg 400w" sizes="(min-width: 768px) 400px, 200px" />
+        </div>
+    </section>
+
+    <section>
+        <h2>Lazy loaded images</h2>
+
+        <p>Native HTML Loading Attribute</p>
+        <div class="img-container">
+            <img srcset="./cat-img-200px.jpg 200w, ./cat-img-400px.jpg 400w" sizes="(min-width: 768px) 400px, 200px"
+                alt="An image of a cat lying on a pillow with half of its body covered with a blanket" loading="eager" />
+        </div>
+
+        <p>Having a placeholder then loading the image once the browser has finished loading its contents.</p>
+
+        <div class="img-container">
+            <img class="lazy" src="./cat-img-10px.jpg"
+                alt="An image of a cat lying on a pillow with half of its body covered with a blanket"
+                data-srcset="./cat-img-200px.jpg 200w, ./cat-img-400px.jpg 400w"
+                sizes="(min-width: 768px) 400px, 200px"
+                />
+        </div>
+
+        <p>Load the image once the image is visible on the viewport</p>
+
+        <div class="img-container">
+            <img class="lazy-scroll" src="./cat-img-10px.jpg" sizes="(min-width: 768px) 400px, 200px"
+                alt="An image of a cat lying on a pillow with half of its body covered with a blanket"
+                data-srcset="./cat-img-200px.jpg 200w, ./cat-img-400px.jpg 400w" />
+        </div>
+        <div class="img-container">
+            <img class="lazy-scroll" src="./cat-img-10px.jpg" sizes="(min-width: 768px) 400px, 200px"
+                alt="An image of a cat lying on a pillow with half of its body covered with a blanket"
+                data-srcset="./cat-img-200px.jpg 200w, ./cat-img-400px.jpg 400w" />
+        </div>
+        <div class="img-container">
+            <img class="lazy-scroll" src="./cat-img-10px.jpg" sizes="(min-width: 768px) 400px, 200px"
+                alt="An image of a cat lying on a pillow with half of its body covered with a blanket"
+                data-srcset="./cat-img-200px.jpg 200w, ./cat-img-400px.jpg 400w" />
+        </div>
+        <div class="img-container">
+            <img class="lazy-scroll" src="./cat-img-10px.jpg" sizes="(min-width: 768px) 400px, 200px"
+                alt="An image of a cat lying on a pillow with half of its body covered with a blanket"
+                data-srcset="./cat-img-200px.jpg 200w, ./cat-img-400px.jpg 400w" />
+        </div>
+        <div class="img-container">
+            <img class="lazy-scroll" src="./cat-img-10px.jpg" sizes="(min-width: 768px) 400px, 200px"
+                alt="An image of a cat lying on a pillow with half of its body covered with a blanket"
+                data-srcset="./cat-img-200px.jpg 200w, ./cat-img-400px.jpg 400w" />
+        </div>
+    </section>
+
+    <script>
+        const observer = new IntersectionObserver(loadOnScroll, {});
+
+        window.addEventListener("DOMContentLoaded", () => {
+            const imagesToBeLazyLoaded = document.querySelectorAll(".lazy");
+            const imagesToBeLazyLoadedOnVisible = document.querySelectorAll(".lazy-scroll");
+
+            imagesToBeLazyLoaded.forEach((img) => {
+                img.srcset = img.dataset.srcset;
+                img.onload = function () {
+                    img.removeAttribute("data-srcset");
+                }
+            });
+
+            imagesToBeLazyLoadedOnVisible.forEach((img) => {
+                observer.observe(img);
+            });
+        });
+
+        function loadOnScroll(entries) {
+            entries.forEach((entry) => {
+                if (entry.isIntersecting) {
+
+                    if (entry.target instanceof HTMLImageElement) {
+                        entry.target.srcset = entry.target.dataset.srcset;
+                        entry.target.onload = function () {
+                            entry.target.removeAttribute("data-srcset");
+                        }
+                    }
+
+                    // Since the image will be fully loaded by then, don't observe it anymore.
+                    observer.unobserve(entry.target);
+                }
+            });
+        }
+    </script>
+</body>
+
+</html>
